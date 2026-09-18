@@ -803,7 +803,7 @@ body.opening-active{overflow:hidden}
   background:
     linear-gradient(180deg, rgba(12,18,16,.06), rgba(12,18,16,.22)),
     url("opening-image.jpg") center center / cover no-repeat;
-  filter:sepia(.16) saturate(.84) contrast(.96) brightness(1.08) blur(1px);
+  filter:none;
   transform:scale(1.075);
   animation:openingZoom 5.5s cubic-bezier(.2,.7,.2,1) forwards;
 }
@@ -818,7 +818,7 @@ body.opening-active{overflow:hidden}
    the filter is computed across the whole (oversized) element. */
 .opening-grain{
   position:absolute; inset:-20%;
-  opacity:.095; pointer-events:none;
+  opacity:.08; pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
   background-size:180px 180px;
   background-repeat:repeat;
@@ -905,9 +905,21 @@ html[dir="ltr"] .opening-progress span{transform-origin:left}
 }
 .opening-vignette{
   background:
-    linear-gradient(90deg, rgba(120,88,48,.035), rgba(255,244,210,.025), rgba(88,58,35,.035)),
-    radial-gradient(circle at 50% 42%, transparent 28%, rgba(12,18,16,.08) 58%, rgba(6,10,9,.52) 100%),
-    linear-gradient(180deg, rgba(6,10,9,.08), transparent 45%, rgba(6,10,9,.42));
+    radial-gradient(circle at 50% 45%, transparent 34%, rgba(0,0,0,.08) 72%, rgba(0,0,0,.28) 100%);
+}
+.opening-grain{
+  opacity:.16;
+  mix-blend-mode:screen;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
+  background-size:140px 140px;
+  animation:grainDrift .32s steps(2) infinite, filmFlicker 2.8s steps(4) infinite;
+}
+@keyframes grainDrift{
+  0%{background-position:0 0}
+  25%{background-position:-18px 11px}
+  50%{background-position:9px -14px}
+  75%{background-position:22px 17px}
+  100%{background-position:-7px -9px}
 }
 
 @keyframes openingZoom{from{transform:scale(1.075)}to{transform:scale(1.01)}}
