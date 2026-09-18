@@ -208,9 +208,10 @@ body::before{
      every frame is the single heaviest thing a mid-range phone can be
      asked to do during a theme switch. It flips instantly, hidden
      underneath the cross-fade. */
-  filter:saturate(1.28) contrast(1.05) brightness(1.12);
+  filter:saturate(1.12) contrast(1.02) brightness(1.08) blur(1px);
+  transform:translateZ(0) scale(1.008);
   contain:strict;
-  transform:translateZ(0);
+  transform:translateZ(0) scale(1.008);
 }
 body::after{
   content:"";
@@ -228,7 +229,7 @@ body::after{
   background:
     linear-gradient(rgba(6,8,7,.16), rgba(6,8,7,.30)),
     url("carpett.jpg") center center / cover no-repeat;
-  filter:saturate(1.15) contrast(1.08) brightness(.86);
+  filter:saturate(1.08) contrast(1.04) brightness(.84) blur(1px);
 }
 .dark body::after{
   background:
@@ -802,7 +803,7 @@ body.opening-active{overflow:hidden}
   background:
     linear-gradient(180deg, rgba(12,18,16,.06), rgba(12,18,16,.22)),
     url("opening-image.jpg") center center / cover no-repeat;
-  filter:saturate(1.15) contrast(1.02) brightness(1.14);
+  filter:sepia(.16) saturate(.84) contrast(.96) brightness(1.08) blur(1px);
   transform:scale(1.075);
   animation:openingZoom 5.5s cubic-bezier(.2,.7,.2,1) forwards;
 }
@@ -817,12 +818,12 @@ body.opening-active{overflow:hidden}
    the filter is computed across the whole (oversized) element. */
 .opening-grain{
   position:absolute; inset:-20%;
-  opacity:.08; pointer-events:none;
+  opacity:.095; pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
   background-size:180px 180px;
   background-repeat:repeat;
-  animation:grainShift .4s steps(2) infinite;
-  will-change:transform;
+  animation:grainShift .4s steps(2) infinite, filmFlicker 2.8s steps(4) infinite;
+  will-change:transform,opacity;
 }
 .opening-content{
   position:relative; z-index:2;
@@ -896,6 +897,18 @@ body.opening-active{overflow:hidden}
   animation:openingProgress 3.6s ease-out forwards;
 }
 html[dir="ltr"] .opening-progress span{transform-origin:left}
+
+@keyframes filmFlicker{
+  0%,100%{opacity:.085}
+  50%{opacity:.11}
+  75%{opacity:.075}
+}
+.opening-vignette{
+  background:
+    linear-gradient(90deg, rgba(120,88,48,.035), rgba(255,244,210,.025), rgba(88,58,35,.035)),
+    radial-gradient(circle at 50% 42%, transparent 28%, rgba(12,18,16,.08) 58%, rgba(6,10,9,.52) 100%),
+    linear-gradient(180deg, rgba(6,10,9,.08), transparent 45%, rgba(6,10,9,.42));
+}
 
 @keyframes openingZoom{from{transform:scale(1.075)}to{transform:scale(1.01)}}
 @keyframes openingContentIn{
@@ -994,21 +1007,6 @@ html[dir="ltr"] .opening-progress span{transform-origin:left}
   .opening-logo{clip-path:none!important; opacity:1!important; transform:none!important}
 }
 
-/* Soften background images so the main content stands out more clearly. */
-.page-bg::after,
-.opening::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:rgba(255,255,255,.28);
-  pointer-events:none;
-  z-index:1;
-}
-.page-bg > *,
-.opening > *{
-  position:relative;
-  z-index:2;
-}
 
 </style>
 
