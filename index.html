@@ -208,10 +208,9 @@ body::before{
      every frame is the single heaviest thing a mid-range phone can be
      asked to do during a theme switch. It flips instantly, hidden
      underneath the cross-fade. */
-  filter:saturate(1.12) contrast(1.02) brightness(1.08) blur(1px);
-  transform:translateZ(0) scale(1.008);
+  filter:saturate(1.28) contrast(1.05) brightness(1.12);
   contain:strict;
-  transform:translateZ(0) scale(1.008);
+  transform:translateZ(0);
 }
 body::after{
   content:"";
@@ -229,7 +228,7 @@ body::after{
   background:
     linear-gradient(rgba(6,8,7,.16), rgba(6,8,7,.30)),
     url("carpett.jpg") center center / cover no-repeat;
-  filter:saturate(1.08) contrast(1.04) brightness(.84) blur(1px);
+  filter:saturate(1.15) contrast(1.08) brightness(.86);
 }
 .dark body::after{
   background:
@@ -803,7 +802,7 @@ body.opening-active{overflow:hidden}
   background:
     linear-gradient(180deg, rgba(12,18,16,.06), rgba(12,18,16,.22)),
     url("opening-image.jpg") center center / cover no-repeat;
-  filter:none;
+  filter:saturate(1.15) contrast(1.02) brightness(1.14);
   transform:scale(1.075);
   animation:openingZoom 5.5s cubic-bezier(.2,.7,.2,1) forwards;
 }
@@ -822,8 +821,8 @@ body.opening-active{overflow:hidden}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
   background-size:180px 180px;
   background-repeat:repeat;
-  animation:grainShift .4s steps(2) infinite, filmFlicker 2.8s steps(4) infinite;
-  will-change:transform,opacity;
+  animation:grainShift .4s steps(2) infinite;
+  will-change:transform;
 }
 .opening-content{
   position:relative; z-index:2;
@@ -897,30 +896,6 @@ body.opening-active{overflow:hidden}
   animation:openingProgress 3.6s ease-out forwards;
 }
 html[dir="ltr"] .opening-progress span{transform-origin:left}
-
-@keyframes filmFlicker{
-  0%,100%{opacity:.085}
-  50%{opacity:.11}
-  75%{opacity:.075}
-}
-.opening-vignette{
-  background:
-    radial-gradient(circle at 50% 45%, transparent 34%, rgba(0,0,0,.08) 72%, rgba(0,0,0,.28) 100%);
-}
-.opening-grain{
-  opacity:.16;
-  mix-blend-mode:screen;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E");
-  background-size:140px 140px;
-  animation:grainDrift .32s steps(2) infinite, filmFlicker 2.8s steps(4) infinite;
-}
-@keyframes grainDrift{
-  0%{background-position:0 0}
-  25%{background-position:-18px 11px}
-  50%{background-position:9px -14px}
-  75%{background-position:22px 17px}
-  100%{background-position:-7px -9px}
-}
 
 @keyframes openingZoom{from{transform:scale(1.075)}to{transform:scale(1.01)}}
 @keyframes openingContentIn{
@@ -1018,8 +993,6 @@ html[dir="ltr"] .opening-progress span{transform-origin:left}
      disabling animation must not leave it clipped, faded or scaled */
   .opening-logo{clip-path:none!important; opacity:1!important; transform:none!important}
 }
-
-
 </style>
 
 <!-- Without JS the opening scene would trap the page behind a
