@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl" class="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#0a0d0c" id="themeColor">
 <title>فرشستان — ارتباط با ما</title>
@@ -173,6 +173,8 @@ html.theme-swap *::after{
 *{box-sizing:border-box}
 html{
   scroll-behavior:smooth;
+  /* Keep normal one-finger vertical scrolling/tapping, but prevent browser zoom gestures. */
+  touch-action:pan-y;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
   font-feature-settings:"kern" 1,"liga" 1;
@@ -318,6 +320,21 @@ a.card,a.msg,a.map{text-decoration:none;color:inherit}
   display:flex; align-items:center; gap:9px;
   direction:ltr;
 }
+
+/* The opening scene fully covers these layers, so do not paint/raster them
+   while they are invisible. They become visible at exactly the same moment
+   as the existing reveal starts — no visual layout change. */
+body.opening-active .topbar,
+body.opening-active .shell{
+  visibility:hidden;
+}
+body.opening-active .orb{
+  animation-play-state:paused;
+}
+body:not(.opening-active) .topbar,
+body:not(.opening-active) .shell{
+  visibility:visible;
+}
 .icon-btn,.lang{
   position:relative; overflow:hidden;
   height:44px; display:grid; place-items:center;
@@ -390,6 +407,7 @@ a.card,a.msg,a.map{text-decoration:none;color:inherit}
 .orb.two{background:radial-gradient(circle, var(--emerald) 0%, transparent 68%); bottom:4%; left:-160px; animation-delay:-6s}
 .dark .orb{opacity:.16}
 @keyframes float{50%{transform:translate3d(0,34px,0) scale(1.1)}}
+html.is-scrolling .orb{animation-play-state:paused}
 
 /* ============================================================
    ONE ORCHESTRATED REVEAL
@@ -698,7 +716,7 @@ html[dir="ltr"] .chev svg{transform:rotate(180deg)}
 /* ============================================================
    ADDRESS + MAP
    ============================================================ */
-.address{display:flex; flex-direction:column; gap:9px}
+.address{display:flex; flex-direction:column; gap:9px;}
 .mapgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
 .map{
   display:flex; align-items:center; justify-content:center;
@@ -746,7 +764,7 @@ html[dir="ltr"] .chev svg{transform:rotate(180deg)}
 /* ============================================================
    FOOTER
    ============================================================ */
-.footer-wrap{display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:6px}
+.footer-wrap{display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:6px;}
 .footer{
   display:inline-block;
   color:var(--ink-2); font-size:10.5px; font-weight:600;
@@ -803,8 +821,10 @@ body.opening-active{overflow:hidden}
     linear-gradient(180deg, rgba(12,18,16,.06), rgba(12,18,16,.22)),
     url("opening-image.jpg") center center / cover no-repeat;
   filter:saturate(1.15) contrast(1.02) brightness(1.14);
-  transform:scale(1.075);
+  transform:translate3d(0,0,0) scale(1.075);
   animation:openingZoom 5.5s cubic-bezier(.2,.7,.2,1) forwards;
+  will-change:transform;
+  backface-visibility:hidden;
 }
 .opening-vignette{
   position:absolute; inset:0;
@@ -853,6 +873,7 @@ body.opening-active{overflow:hidden}
   width:80px; height:1px; margin:22px auto 16px;
   background:linear-gradient(90deg, transparent, #e8cf94, transparent);
   box-shadow:0 0 20px rgba(232,207,148,.7);
+  contain:paint;
 }
 .opening-scene .motif{margin:0 auto 18px}
 .opening-title{
@@ -875,6 +896,7 @@ body.opening-active{overflow:hidden}
   font-size:clamp(15px,3.8vw,21px);
   font-weight:700;
   animation:scrollPulse 2.2s ease-in-out infinite;
+  will-change:transform,opacity;
   text-shadow:
     0 0 8px rgba(232,207,148,.65),
     0 0 18px rgba(232,207,148,.45),
@@ -894,6 +916,7 @@ body.opening-active{overflow:hidden}
   transform:scaleX(0); transform-origin:right;
   background:linear-gradient(90deg, transparent, #e8cf94, transparent);
   animation:openingProgress 3.6s ease-out forwards;
+  will-change:transform;
 }
 html[dir="ltr"] .opening-progress span{transform-origin:left}
 
@@ -922,6 +945,12 @@ html[dir="ltr"] .opening-progress span{transform-origin:left}
   .logo-fa{width:clamp(160px,58vw,220px)}
   .mapgrid{grid-template-columns:1fr 1fr}
   .map:last-child{grid-column:1 / -1}
+
+  /* On compact phones the two phone cards cannot physically fit all of
+     their fixed-width pieces side-by-side. Keep the exact card styling
+     and content, but let each phone card use the full row so both the
+     title and the complete phone number remain readable. */
+  .cards .card.call{grid-column:1 / -1}
 
   /* Compact-phone guard:
      keep every card the same overall size, but give its text more usable
@@ -973,6 +1002,29 @@ html[dir="ltr"] .opening-progress span{transform-origin:left}
   }
 }
 
+/* Touch screens can leave :hover latched after a tap. Keep the intended
+   tap feedback via .force-hover, but prevent the browser from keeping a
+   second expensive hover state alive while the user scrolls. */
+@media (hover:none) and (pointer:coarse){
+  .card:hover:not(.force-hover),
+  .msg:hover:not(.force-hover),
+  .map:hover:not(.force-hover),
+  .icon-btn:hover:not(.force-hover),
+  .lang:hover:not(.force-hover){
+    transform:none;
+    border-color:var(--line-2);
+  }
+  .card:hover:not(.force-hover), .msg:hover:not(.force-hover), .map:hover:not(.force-hover){
+    box-shadow:var(--sh-md), inset 0 1px 0 rgba(255,255,255,.55);
+  }
+  .card:hover:not(.force-hover)::before,
+  .msg:hover:not(.force-hover)::before{opacity:0}
+  .card:hover:not(.force-hover)::after{transform:translateX(-160%) skewX(-16deg)}
+  .icon-btn:hover:not(.force-hover), .lang:hover:not(.force-hover){
+    box-shadow:var(--sh-sm), inset 0 1px 0 rgba(255,255,255,.7);
+  }
+}
+
 @supports not (backdrop-filter:blur(10px)){
   .icon-btn,.lang{background:rgba(255,255,255,.95)}
   .dark .icon-btn,.dark .lang{background:rgba(24,31,28,.95)}
@@ -1000,8 +1052,22 @@ html[dir="ltr"] .opening-progress span{transform-origin:left}
 <noscript><style>
   .opening-scene{display:none!important}
   body.opening-active{overflow:auto!important}
+  .topbar,.shell{visibility:visible!important}
   .hero,.cards,.messaging,.address,.footer-wrap{opacity:1!important; transform:none!important}
 </style></noscript>
+<script>
+/* Prevent pinch/double-gesture zoom on mobile while keeping taps and vertical scrolling. */
+(function(){
+  try{
+    document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
+    document.addEventListener('gesturechange', function(e){ e.preventDefault(); }, {passive:false});
+    document.addEventListener('gestureend', function(e){ e.preventDefault(); }, {passive:false});
+    document.addEventListener('touchmove', function(e){
+      if(e.touches && e.touches.length > 1) e.preventDefault();
+    }, {passive:false});
+  }catch(e){}
+})();
+</script>
 </head>
 
 <body class="opening-active">
@@ -1271,40 +1337,67 @@ function toast(text){
 
 /* ============ OPENING SCENE ============ */
 var openingDismissed = false;
-function dismissOpening(){
-  if(openingDismissed) return;
-  openingDismissed = true;
-  openingScene.classList.add('is-gone');
-  body.classList.remove('opening-active');
-  /* Detaching the scene stops the grain animation and frees its
-     compositor layers; nothing else references it afterwards. */
-  setTimeout(function(){
-    if(openingScene.parentNode) openingScene.parentNode.removeChild(openingScene);
-    openingScene = null;
-  }, 1200);
+
+function onOpeningWheel(e){
+  if(e.deltaY > 2) dismissOpening();
 }
-
-addEventListener('wheel', function(e){
-  if(!openingDismissed && e.deltaY > 2) dismissOpening();
-}, {passive:true});
-
-addEventListener('touchmove', function(){
-  if(!openingDismissed) dismissOpening();
-}, {passive:true});
-
-addEventListener('keydown', function(e){
-  if(openingDismissed) return;
+function onOpeningTouchMove(){
+  dismissOpening();
+}
+function onOpeningKeyDown(e){
   if(e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ' ||
      e.key === 'Enter' || e.key === 'Escape'){
     e.preventDefault();
     dismissOpening();
   }
-});
+}
 
+function removeOpeningListeners(){
+  removeEventListener('wheel', onOpeningWheel);
+  removeEventListener('touchmove', onOpeningTouchMove);
+  removeEventListener('keydown', onOpeningKeyDown);
+  if(openingScene) openingScene.removeEventListener('click', dismissOpening);
+}
+
+function dismissOpening(){
+  if(openingDismissed) return;
+  openingDismissed = true;
+
+  /* Once the opening is dismissed, these global listeners are no longer
+     useful. Removing them means scroll gestures are completely free of
+     opening-scene JS work. */
+  removeOpeningListeners();
+
+  openingScene.classList.add('is-gone');
+  body.classList.remove('opening-active');
+
+  /* Detaching the scene stops the grain animation and frees its
+     compositor layers; nothing else references it afterwards. */
+  setTimeout(function(){
+    if(openingScene && openingScene.parentNode){
+      openingScene.parentNode.removeChild(openingScene);
+    }
+    openingScene = null;
+  }, 1200);
+}
+
+addEventListener('wheel', onOpeningWheel, {passive:true});
+addEventListener('touchmove', onOpeningTouchMove, {passive:true});
+addEventListener('keydown', onOpeningKeyDown);
 openingScene.addEventListener('click', dismissOpening);
 
 /* ============ THEME ============ */
 var noMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+/* Avoid View Transition snapshots on genuinely constrained devices.
+   The fallback below is compositor-only and keeps the same visual idea
+   while avoiding a full-page bitmap snapshot during the theme switch. */
+var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+var lowPowerDevice = (
+  (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) ||
+  (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+  (conn && conn.saveData === true)
+);
 
 /* The raw swap: synchronous, one paint, nothing animated. */
 function setTheme(isDark){
@@ -1356,7 +1449,7 @@ function applyTheme(isDark, announce){
     toast(isDark ? I18N[currentLang].themeDark : I18N[currentLang].themeLight);
   };
 
-  if(document.startViewTransition){
+  if(document.startViewTransition && !lowPowerDevice){
     var clear = function(){ root.classList.remove('theme-swap'); };
     root.classList.add('theme-swap');
     var vt = document.startViewTransition(function(){ setTheme(isDark); });
@@ -1411,9 +1504,9 @@ langBtn.addEventListener('click', function(){
 });
 
 /* ============ SOFT CURSOR LIGHT ============
-   One delegated listener instead of ~14, and the write is deferred
-   to the next frame so a fast pointer sweep can never queue more
-   style writes than the compositor can draw. */
+   High-frequency pointermove is installed only where a real hover cursor
+   exists. Touch scrolling therefore has no document-level pointermove
+   handler running on every gesture frame. */
 var LIT = '.card:not(.static), .map, .msg, .icon-btn, .lang';
 var pendingEl = null, pendingX = 0, pendingY = 0, rafScheduled = false;
 
@@ -1425,24 +1518,25 @@ function flushPointer(){
   pendingEl = null;
 }
 
-document.addEventListener('pointermove', function(e){
-  if(e.pointerType === 'touch') return;
-  var el = e.target.closest ? e.target.closest(LIT) : null;
-  if(!el) return;
-  var r = el.getBoundingClientRect();
-  pendingEl = el;
-  pendingX = e.clientX - r.left;
-  pendingY = e.clientY - r.top;
-  if(!rafScheduled){ rafScheduled = true; requestAnimationFrame(flushPointer); }
-}, {passive:true});
+var hasHoverPointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+if(hasHoverPointer){
+  document.addEventListener('pointermove', function(e){
+    if(e.pointerType === 'touch') return;
+    var el = e.target.closest ? e.target.closest(LIT) : null;
+    if(!el) return;
+    var r = el.getBoundingClientRect();
+    pendingEl = el;
+    pendingX = e.clientX - r.left;
+    pendingY = e.clientY - r.top;
+    if(!rafScheduled){ rafScheduled = true; requestAnimationFrame(flushPointer); }
+  }, {passive:true});
+}
 
 /* ============ TOUCH: same shine/glow on tap ============
    Touch devices have no cursor, so the glow would never be seen.
    It is lit on pointerdown, which happens well before navigation.
-   The previous version delayed navigation and then called
-   window.open() from a timer — outside the user gesture, which
-   iOS and most pop-up blockers reject, so links could silently
-   fail to open. Navigation is now left entirely to the browser. */
+   Navigation remains a native browser gesture. */
 if(matchMedia('(hover: none), (pointer: coarse)').matches){
   document.addEventListener('pointerdown', function(e){
     if(e.pointerType !== 'touch') return;
@@ -1458,6 +1552,18 @@ if(matchMedia('(hover: none), (pointer: coarse)').matches){
 }
 
 })();
+
+/* ============ MOBILE SCROLL: pause decorative orbs during scroll ============ */
+var scrollStopTimer;
+if(matchMedia('(pointer:coarse)').matches){
+  addEventListener('scroll', function(){
+    document.documentElement.classList.add('is-scrolling');
+    clearTimeout(scrollStopTimer);
+    scrollStopTimer = setTimeout(function(){
+      document.documentElement.classList.remove('is-scrolling');
+    }, 140);
+  }, {passive:true});
+}
 </script>
 
 </body>
